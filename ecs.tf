@@ -21,22 +21,6 @@ data "template_file" "myapp" {
     aws_region     = var.aws_region
   }
 }
-resource "aws_ecs_capacity_provider" "FARGATE" {
-  name = "ecs-capacity-provider-fargate"
-
-  auto_scaling_group_provider {
-    auto_scaling_group_arn         = aws_appautoscaling_target.target.arn
-    managed_termination_protection = "ENABLED"
-
-    managed_scaling {
-      maximum_scaling_step_size = 1000
-      minimum_scaling_step_size = 1
-      status                    = "ENABLED"
-      target_capacity           = 10
-    }
-  }
-}
-
 resource "aws_ecs_task_definition" "app" {
   family                   = "myapp-task"
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
@@ -66,16 +50,9 @@ resource "aws_ecs_service" "main" {
     container_port   = var.app_port
   }
   capacity_provider_strategy {
-    capacity_provider {
-      name = "FARGATE"
-      weight = 1
-      base = 1
-    }
-    capacity_provider {
-      name = "FARGATE_SPOT"
-      weight = 1
-      base = 0
-    }
+    capacity_provider = "FARGATE"
+    weight = 1
+    base = 1
   }
 
   depends_on = [aws_alb_listener.front_end, aws_iam_role_policy_attachment.ecs_task_execution_role]
