@@ -28,6 +28,21 @@ data "template_file" "myapp" {
     aws_region     = var.aws_region
   }
 }
+resource "aws_ecs_capacity_provider" "fargate" {
+  name = "ecs-capacity-provider-fargate"
+
+  auto_scaling_group_provider {
+    auto_scaling_group_arn         = aws_appautoscaling_target.target.arn
+    managed_termination_protection = "ENABLED"
+
+    managed_scaling {
+      maximum_scaling_step_size = 1000
+      minimum_scaling_step_size = 1
+      status                    = "ENABLED"
+      target_capacity           = 10
+    }
+  }
+}
 
 resource "aws_ecs_task_definition" "app" {
   family                   = "myapp-task"
@@ -50,7 +65,7 @@ resource "aws_ecs_service" "main" {
     security_groups  = [aws_security_group.ecs_tasks.id]
     subnets          = aws_subnet.private.*.id
     assign_public_ip = true
-  }
+    }
 
   load_balancer {
     target_group_arn = aws_alb_target_group.app.id
