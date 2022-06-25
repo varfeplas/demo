@@ -28,7 +28,7 @@ data "template_file" "myapp" {
     aws_region     = var.aws_region
   }
 }
-resource "aws_ecs_capacity_provider" "fargate" {
+resource "aws_ecs_capacity_provider" "FARGATE" {
   name = "ecs-capacity-provider-fargate"
 
   auto_scaling_group_provider {
