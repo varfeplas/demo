@@ -4,9 +4,16 @@ resource "aws_ecs_cluster" "main" {
   name = "myapp-cluster"
   capacity_providers  = ["FARGATE", "FARGATE_SPOT"]
   default_capacity_provider_strategy {
-    capacity_provider = "FARGATE"
-    weight = 1
-    base = 1
+      capacity_provider {
+        name = "FARGATE"
+        weight = 5
+        base = 5
+      }
+      capacity_provider {
+        name = "FARGATE_SPOT"
+        weight = 1
+        base = 5
+     }
   }
 }
 
