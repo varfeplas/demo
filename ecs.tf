@@ -2,6 +2,19 @@
 
 resource "aws_ecs_cluster" "main" {
   name = "myapp-cluster"
+  capacity_providers  = ["FARGATE", "FARGATE_SPOT"]
+  default_capacity_provider_strategy {
+      capacity_provider {
+        name = "FARGATE"
+        weight = 1
+        base = 1
+      }
+      capacity_provider {
+        name = "FARGATE_SPOT"
+        weight = 1
+        base = 0
+     }
+  }
 }
 
 data "template_file" "myapp" {
@@ -43,6 +56,18 @@ resource "aws_ecs_service" "main" {
     target_group_arn = aws_alb_target_group.app.id
     container_name   = "myapp"
     container_port   = var.app_port
+  }
+  capacity_provider_strategy {
+    capacity_provider {
+      name = "FARGATE"
+      weight = 1
+      base = 1
+    }
+    capacity_provider {
+      name = "FARGATE_SPOT"
+      weight = 1
+      base = 0
+    }
   }
 
   depends_on = [aws_alb_listener.front_end, aws_iam_role_policy_attachment.ecs_task_execution_role]
